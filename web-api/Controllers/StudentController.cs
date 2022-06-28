@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using web_api.Exception;
@@ -11,19 +12,19 @@ namespace web_api.Controllers;
 [Route("[controller]")]
 public class StudentsController : ControllerBase
 {
-    public static readonly List<Student> Students = new List<Student>
+    public static List<Student> Students = new List<Student>
     {
         new Student(){id=1, name = "yara", email="yara@gmail.com"},
-        new Student(){id=2, name="lynn", email="hello@hotmail"}
+        new Student(){id=2, name="ara", email="hello@hotmail"}
     };
     
-    [HttpGet]
+    [HttpGet()]
     public async Task<List<Student>> GetStudents(){
         return Students;
     }
     
-    [HttpGet("{id}")]
-    public async Task<Student> GetStudent(int id)
+    [HttpGet("{id:int}")]
+    public async Task<Student> GetStudent([FromRoute] int id)
     {
         Student? student = Students.Find((s) => s.id.Equals(id));
         if (student == null)
@@ -32,6 +33,36 @@ public class StudentsController : ControllerBase
         }
 
         return student;
+    }
+
+    [HttpGet("GetStudentByName")]
+    public async Task<List<Student>> GetThatContains([FromQuery] string seq)
+    {
+        List<Student> TheStudents = new List<Student>();
+        //Student? student = Students.Find(s => s.name.Contains(seq));
+        //Console.WriteLine(student);
+        foreach (Student std in Students)
+        {
+            if (std.name.Contains(seq))
+            {
+                TheStudents.Add(std);
+            }
+        }
+        // if (student != null)
+        // {
+        //    TheStudents.Add(student); 
+        // }
+        return TheStudents;
+    
+    }
+
+    [HttpGet("GetDate")]
+    public async Task<string> GetDate([FromHeader] string culture)
+    {
+        DateTime myDate = new DateTime();
+        myDate=DateTime.Now;
+        string date = myDate.ToString(new CultureInfo(culture));
+        return date;
     }
 
     [HttpPost()]
@@ -55,11 +86,13 @@ public class StudentsController : ControllerBase
             {
                 temp.name = name;
                 temp.email = email;
+                return Students;
             }
             else
             {
                 throw new StudentNotFoundException("Not found");
             }
+            
         }
             catch (System.Exception e)
             {
@@ -71,7 +104,38 @@ public class StudentsController : ControllerBase
     }
 
 
+    // [HttpPost("UploadImage")]
+    // public async Task<IActionResult> Upload([FromForm] IList<IFormFile> files) {
+    //     string uploads = Path.Combine(wwwroot, "uploads");
+    //     foreach (IFormFile file in files) {
+    //         if (file.Length > 0) {
+    //             string filePath = Path.Combine(uploads, file.FileName);
+    //             using (Stream fileStream = new FileStream(filePath, FileMode.Create)) {
+    //                 await file.CopyToAsync(fileStream);
+    //             }
+    //         }
+    //     }
+    //     return View();
+    // }
 
+
+    [HttpDelete]
+    public async Task<List<Student>> Delete([FromQuery] int id)
+    {
+        List<Student> NewStudents = new List<Student>();
+        foreach (Student std in Students)
+        {
+            if (std.id != id)
+            {
+                NewStudents.Add(std);
+            }
+            
+        }
+
+        Students = NewStudents;
+        return Students;
+    }
+    
 
 
 
