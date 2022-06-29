@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace web_api.Models;
 
 
-public class Student
+public class UpdateStudent
 {
     [Required (ErrorMessage="Please enter an id")]
     public long Id { get; set; }
