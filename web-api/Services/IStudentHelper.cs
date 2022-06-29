@@ -2,15 +2,16 @@ using web_api.Models;
 
 namespace web_api.Services;
 
-public abstract class IStudentHelper
+public interface IStudentHelper
 {
-    public abstract Task<List<Student>> GetAllStudent(List<Student> Students);
-    public abstract Task<Student> GetStudentById(List<Student> Students, int id);
-    public abstract Task<List<Student>> GetThatContains(List<Student> Students, string seq);
-    public abstract Task<string> GetDate(string culture);
-    public abstract Task<List<Student>> Replace(List<Student> Students, updateStudent request);
-    public abstract Task<List<Student>> AddStudent(List<Student> Students, Student student);
-    public abstract Task<List<Student>> Delete(List<Student> Students, int id);
+    public  Task<List<Student>> GetAllStudent(List<Student> students);
+    public Task<Student> GetStudentById(List<Student> students, int id);
+    public Task<List<Student>> GetThatContains(List<Student> students, string seq);
+    public Task<string> GetDate(string culture);
+    public Task<List<Student>> Replace(List<Student> students, UpdateStudent request);
+    public Task<List<Student>> AddStudent(List<Student> students, Student student);
+    public Task<List<Student>> Delete(List<Student> students, int id);
+    public Task<string> Upload(IWebHostEnvironment hostingEnvironment, UploadImageModel image);
 
-    
+
 }

@@ -13,7 +13,7 @@
 
     <ItemGroup>
       <Folder Include="Pages\Profile" />
-      <Folder Include="Properties\wwwroot" />
+      <Folder Include="wwwroot" />
     </ItemGroup>
 
 </Project>

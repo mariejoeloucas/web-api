@@ -1,19 +1,20 @@
 using System.Globalization;
 using web_api.Exception;
 using web_api.Models;
+using Microsoft.AspNetCore.Hosting;
 
 namespace web_api.Services;
 
 public class StudentHelper : IStudentHelper
 {
-    public override async Task<List<Student>> GetAllStudent(List<Student> Students)
+    public async Task<List<Student>> GetAllStudent(List<Student> students)
     {
-        return Students;
+        return students;
     }
 
-    public override async Task<Student> GetStudentById(List<Student> Students, int id)
+    public async Task<Student> GetStudentById(List<Student> students, int id)
     {
-        Student? student = Students.Find((s) => s.id.Equals(id));
+        Student? student = students.Find((s) => s.Id.Equals(id));
         if (student == null)
         {
             throw new StudentNotFoundException("Student not found!");
@@ -22,96 +23,92 @@ public class StudentHelper : IStudentHelper
         return student;
     }
 
-    public override async Task<List<Student>> GetThatContains(List<Student> Students, string seq)
+    public async Task<List<Student>> GetThatContains(List<Student> students, string seq)
     {
-        List<Student> TheStudents = new List<Student>();
-        //Student? student = Students.Find(s => s.name.Contains(seq));
-        //Console.WriteLine(student);
-        foreach (Student std in Students)
-        {
-            if (std.name.Contains(seq))
-            {
-                TheStudents.Add(std);
-            }
-        }
-        // if (student != null)
-        // {
-        //    TheStudents.Add(student); 
-        // }
-        return TheStudents;
+        return students.Where((s) => s.Name.Contains(seq)).ToList();
     }
 
-    public override async Task<string> GetDate(string culture)
+    public async Task<string> GetDate(string culture)
     {
-        DateTime myDate = new DateTime();
-        myDate=DateTime.Now;
-        string date = myDate.ToString("d" ,CultureInfo.GetCultureInfo(culture));
-        return date; 
+        List<CultureInfo> cultureInfos = CultureInfo.GetCultures(CultureTypes.AllCultures).ToList();
+        CultureInfo? cultureInfo = cultureInfos.Find((c) => c.Name.Equals(culture));
+        if (cultureInfo == null)
+        {
+            throw new System.Exception("Invalid culture!");
+        }
         
+        // return DateTime.Now.ToString("d", CultureInfo.GetCultureInfo(culture));
+
+        return DateTime.Now.ToString("d", cultureInfo);
     }
     
 
-    public override async Task<List<Student>> Replace(List<Student> Students, updateStudent request)
+    public async Task<List<Student>> Replace(List<Student> students, UpdateStudent request)
     {
-        long id = request.id;
-        string name = request.name;
-        string email = request.email;
+        long id = request.Id;
+        string name = request.Name;
+        string email = request.Email;
         Student? temp = null;
-        try
+        foreach (Student s in students)
         {
-            foreach (Student st in Students)
+            if (s.Id == id)
             {
-                if (st.id == id)
-                {
-                    temp = st;
-                }
+                temp = s;
             }
-
-            if (temp != null)
-            {
-                temp.name = name;
-                temp.email = email;
-                return Students;
-            }
-            else
-            {
-                throw new StudentNotFoundException("Not found");
-            }
-            
-        }
-        catch (System.Exception e)
-        {
-            Console.WriteLine($"error:" + e.Message);
-                
         }
 
-        return null;
+        if (temp == null)
+        {
+            throw new StudentNotFoundException("Not found");
+        }
         
+        temp.Name = name;
+        temp.Email = email;
+        return students;
     }
 
-    public override async Task<List<Student>> AddStudent(List<Student> Students, Student student)
+    public async Task<List<Student>> AddStudent(List<Student> students, Student student)
     {
-        Students.Add(student);
-        return Students;
-        
+        students.Add(student);
+        return students;
     }
 
-    public override async Task<List<Student>> Delete(List<Student> Students, int id)
+    public async Task<List<Student>> Delete(List<Student> students, int id)
     {
-        List<Student> NewStudents = new List<Student>();
-        foreach (Student std in Students)
+        Student? student = students.Find((s) => s.Id.Equals(id));
+        if (student == null)
         {
-            if (std.id != id)
-            {
-                NewStudents.Add(std);
-            }
-            
+            throw new StudentNotFoundException("Student not found!");
         }
 
-        Students = NewStudents;
-        return Students;
-        
+        students.Remove(student);
+        return students;
     }
+    public async Task<string> Upload(IWebHostEnvironment hostingEnvironment, UploadImageModel image)
+    {
+        string uploads = hostingEnvironment.WebRootPath;
+        string filePath = Path.Combine(uploads.ToString(), image.Image.FileName);
+        using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await image.Image.CopyToAsync(fileStream);
+        }
+    
+        return "Image uploaded.";
+    }
+
+    
+    // public override async Task<string> Upload(UploadImageModel image)
+    // {
+    //     string fileName = (image.Image.FileName).ToString();
+    //     string filePath = $@"wwwroot/{fileName}";
+    //     using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+    //     {
+    //         await image.Image.CopyToAsync(fileStream);
+    //     }
+    //
+    //     return "done";
+    // }
+
 
     
 }
